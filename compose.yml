@@ -2,6 +2,11 @@ version: '3.9'
 networks:
   webapp:
     driver: bridge
+secrets:
+  pg-secret:
+    file: ./pg_secret
+  pg-user:
+    file: ./pg_user
 services:
   nginx:
     image: nginx:latest
@@ -13,24 +18,27 @@ services:
     ports:
       - 8080:80
   webapp:
-    image: webapp:v5
+    image: webapp:v6
     container_name: webapp
     environment:
-      - DBHOST=''
-      - DB=''
-      - DBUSER=''
-      - DBPASS=''
+      - DBHOST=webapp-postgres
+      - DB=testdb
     networks:
       - webapp
-  postgres:
+    secrets:
+      - pg-secret
+      - pg-user
+  webapp-postgres:
     image: postgres:15-alpine
     container_name: webapp_postgres
     volumes:
       - /home/teele/pg-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=''
-      - POSTGRES_USER=''
-      - POSTGRES_DB=''
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg-secret
+      - POSTGRES_USER_FILE=/run/secrets/pg-user
+      - POSTGRES_DB=testdb
     networks:
       - webapp
-  
+    secrets:
+      - pg-secret
+      - pg-user

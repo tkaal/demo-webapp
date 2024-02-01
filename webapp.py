@@ -29,12 +29,17 @@ dictConfig({
 })
 
 app = Flask(__name__)
+with open('/run/secrets/pg-user') as userfile:
+    dbuser = userfile.readline().strip()
+with open('/run/secrets/pg-secret') as passfile:
+    dbpass = passfile.readline().strip()
+
 
 conn = psycopg2.connect(
         host=os.environ.get('DBHOST'),
         database=os.environ.get('DB'),
-        user=os.environ.get('DBUSER'),
-        password=os.environ.get('DBPASS')
+        user=dbuser,
+        password=dbpass
         )
 
 @app.route("/")
