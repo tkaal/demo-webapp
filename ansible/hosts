@@ -1,0 +1,2 @@
+[webapp]
+localhost ansible_connection=local ansible_become_pass="{{ localhost_become_password }}"

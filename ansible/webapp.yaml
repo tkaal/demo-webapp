@@ -1,0 +1,16 @@
+---
+- name: Gather facts
+  hosts: all
+  vars_files:
+    - ./group_vars/main.yaml
+
+  tasks:
+    - setup:
+
+- name: Prepare and start up web app
+  hosts: webapp
+  gather_facts: no
+  vars_files:
+    - ./group_vars/main.yaml
+  roles:
+    - webapp
