@@ -90,9 +90,9 @@ def update_item_status():
     try:
         application = request.json["alerts"][0]["labels"]["appname"]
         if request.json["status"] == "resolved":
-            new_status = "ok"
+            new_status = "OK"
         else:
-            new_status = "problem"
+            new_status = "PROBLEM"
         app.logger.info(f"Received status update for app {application}, changing status to {new_status}")
         if update_status_query(appname=application,status=new_status):
             app.logger.info(f"Successfully changed status to {new_status} for app {application}")
@@ -103,22 +103,22 @@ def update_item_status():
         app.logger.error(e)
 
 def insert_query(appname):
+    cur = conn.cursor()
     try:
-        cur = conn.cursor()
         cur.execute(f"INSERT INTO monitoring(appname, status) VALUES ('{appname}', 'OK');")
         conn.commit()
         cur.close()
-        conn.close()
         return True
     except Exception as e:
         app.logger.error("Encountered an error while inserting the new item: ")
         app.logger.error(e)
-        conn.close()
+        conn.rollback()
+        cur.close()
         return False
     
 def list_query(appname=None):
+    cur = conn.cursor()
     try:
-        cur = conn.cursor()
         if appname != None:
             cur.execute(f"SELECT * FROM monitoring WHERE appname = '{appname}';")
             ret = tuple(cur.fetchone())
@@ -129,12 +129,12 @@ def list_query(appname=None):
     except Exception as e:
         app.logger.error("Encountered an error while performing the select query!")
         app.logger.error(e)
-        conn.close()
+        cur.close()
         return "Encountered a problem while performing the select query!"
     
 def get_status_query(appname):
+    cur = conn.cursor()
     try:
-        cur = conn.cursor()
         cur.execute(f"SELECT status FROM monitoring WHERE appname = '{appname}';")
         status = cur.fetchone()[0]
         cur.close()
@@ -142,20 +142,21 @@ def get_status_query(appname):
     except Exception as e:
         app.logger.error("Encountered an error while performing the select query!")
         app.logger.error(e)
-        conn.close()
+        cur.close()
         return "Encountered a problem while performing the select query!"
     
 
 def update_status_query(appname, status):
+    cur = conn.cursor()
     try:
-        cur = conn.cursor()
         cur.execute(f"UPDATE monitoring SET status = '{status}' WHERE appname = '{appname}';")
         conn.commit()
         cur.close()
         return True
     except Exception as e:
-        conn.close()
         app.logger.error(e)
+        conn.rollback()
+        cur.close()
         return False
     
 

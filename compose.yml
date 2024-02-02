@@ -17,28 +17,40 @@ services:
       - webapp
     ports:
       - 8080:80
+    depends_on:
+      - webapp
   webapp:
-    image: webapp:v6
+    image: webapp:v10
     container_name: webapp
     environment:
       - DBHOST=webapp-postgres
-      - DB=testdb
+      - DB=monitoringdb
     networks:
       - webapp
     secrets:
       - pg-secret
       - pg-user
+    depends_on:
+      webapp-postgres:
+        condition: service_healthy
   webapp-postgres:
     image: postgres:15-alpine
     container_name: webapp_postgres
     volumes:
       - /home/teele/pg-data:/var/lib/postgresql/data
+      - ./init-table.sql:/docker-entrypoint-initdb.d/init-table.sql
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/pg-secret
       - POSTGRES_USER_FILE=/run/secrets/pg-user
-      - POSTGRES_DB=testdb
+      - POSTGRES_DB=monitoringdb
     networks:
       - webapp
     secrets:
       - pg-secret
       - pg-user
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready", "-d", "monitoringdb"]
+        interval: 10s
+        timeout: 30s
+        retries: 5
+        start_period: 15s
