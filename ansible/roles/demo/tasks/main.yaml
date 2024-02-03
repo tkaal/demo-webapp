@@ -33,15 +33,6 @@
     dest: "{{ demo_root_dir }}/compose.yaml"
     owner: "{{ demo_user }}"
 
-- name: Add webapp domain to /etc/hosts file
-  lineinfile:
-    dest: /etc/hosts
-    regexp: '.*{{ hostvars[item].ansible_default_ipv4.address }}$'
-    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{webapp_domain}}"
-    state: present
-  become: yes
-  with_items: "{{ groups.webapp }}"
-
 - name: Ensure that necessary pip packages are installed to be able to start up docker compose via Ansible
   ansible.builtin.pip:
     name:

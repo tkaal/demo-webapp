@@ -73,3 +73,12 @@
         -  item.State  == "running"
   with_items:
     - "{{ output.containers }}"
+
+- name: Add webapp domain to /etc/hosts file
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ hostvars[item].ansible_default_ipv4.address }}$'
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{webapp_domain}}"
+    state: present
+  become: yes
+  with_items: "{{ groups.webapp }}"
