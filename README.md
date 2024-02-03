@@ -11,7 +11,7 @@ In total, there are three services in the webapp Docker compose setup:
 
 - **nginx**
 
-    nginx is used as a proxy that forwards HTTP requests to the webapp. Using nginx in front of webapp helps to keep the webapp Flask application logic simpler as more complex web server configuration can be handled by nginx.
+    nginx is used as a proxy that forwards HTTP requests to the webapp. Using nginx in front of webapp helps to keep Flask logic simpler as more complex web server configuration can be handled by nginx.
 
 - **webapp**
 
