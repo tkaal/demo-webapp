@@ -93,6 +93,7 @@ Another option for installing webapp is deploying it manually. All necessary fil
    docker compose up -d
 ```
 The Docker compose file will build webapp image based on Dockerfile located in the directory and will start up all services. After docker compose command has finished, webapp should be accessible via URL http://localhost:8080 and display following message:
+
 ![alt text](manual_install_test.PNG)
 
 If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value and execute following command inside the manual installation directory:
