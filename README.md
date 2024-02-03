@@ -1,4 +1,14 @@
 # WEBAPP
+- [WEBAPP](#webapp)
+  - [Overview](#overview)
+  - [Installation](#installation)
+    - [Installation via Ansible](#installation-via-ansible)
+      - [Prerequisites](#prerequisites)
+      - [Preparations](#preparations)
+      - [Running the playbook](#running-the-playbook)
+    - [Manual installation](#manual-installation)
+  - [API guide](#api-guide)
+  - [Testing webapp locally with provided demo resources](#testing-webapp-locally-with-provided-demo-resources)
 
 ## Overview
 This is a simple proof-of-concept Python Flask application **webapp** that can be used for monitoring the statuses of other applications. webapp is set up with Docker compose and it exposes an API that can be used for communicating with the application. This API can be used for obtaining or updating the status of some application via HTTP requests. These requests can be done manually, but it is also possible to use webapp API as a webhook for some other platform. For example, it can be used as a contact point for Grafana alerts.
@@ -71,4 +81,26 @@ Here is a little summary about what the playbook will do:
 When the playbook has finished, then it should be possible to access webapp via URLs http://localhost:HOSTPORT (http://localhost:8080 by default) and http://WEBAPPDOMAIN:HOSTPORT (http://webapp.demo:8080 by default). Following message and web page should be shown, if webapp is up and running: 
 ![alt text](webapp_up.PNG)
 
-Check the API documentation below to see how to communicate with webapp.
+Check the API guide below to see how to communicate with webapp.
+
+### Manual installation
+Another option for installing webapp is deploying it manually. All necessary files can be found from directory **manual-deploy**. Following steps need to be done to perform manual installation of webapp:
+- Copy the manual-deploy directory to a suitable destination 
+- Configure database user for webapp by writing the username to file **./manual-deploy/config/pg_user**. This file will be used to create Docker secret **pg-user** that webapp and webapp-postgres services are using.
+- Configure database password for webapp by writing the password to file **./manual-deploy/config/pg_secret**. This file will be used to create Docker secret **pg-secret** that webapp and webapp-postgres services are using.
+- Start up the Docker compose setup in detached mode with command while being in the directory:
+```
+   docker compose up -d
+```
+The Docker compose file will build webapp image based on Dockerfile located in the directory and will start up all services. After docker compose command has finished, webapp should be accessible via URL http://localhost:8080 and display following message:
+![alt text](manual_install_test.PNG)
+
+If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value and execute following command inside the manual installation directory:
+```
+   docker compose restart
+```
+Check the API guide below to see how to communicate with webapp.
+
+## API guide
+
+## Testing webapp locally with provided demo resources
