@@ -19,6 +19,7 @@ services:
       - {{ webapp_host_port }}:80
     depends_on:
       - webapp
+    restart: unless-stopped
   webapp:
     image: {{ webapp_image_name }}:{{ webapp_image_version }}
     container_name: webapp
@@ -33,6 +34,7 @@ services:
     depends_on:
       webapp-postgres:
         condition: service_healthy
+    restart: unless-stopped
   webapp-postgres:
     image: postgres:15-alpine
     container_name: webapp_postgres
@@ -54,3 +56,4 @@ services:
         timeout: 30s
         retries: 5
         start_period: 15s
+    restart: unless-stopped

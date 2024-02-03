@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 networks:
   webapp:
     driver: bridge
@@ -19,8 +19,9 @@ services:
       - 8080:80
     depends_on:
       - webapp
+    restart: unless-stopped
   webapp:
-    image: webapp:v10
+    build: .
     container_name: webapp
     environment:
       - DBHOST=webapp-postgres
@@ -33,12 +34,13 @@ services:
     depends_on:
       webapp-postgres:
         condition: service_healthy
+    restart: unless-stopped
   webapp-postgres:
     image: postgres:15-alpine
     container_name: webapp_postgres
     volumes:
-      - /home/teele/pg-data:/var/lib/postgresql/data
-      - ./init-table.sql:/docker-entrypoint-initdb.d/init-table.sql
+      - ./data/pg-data:/var/lib/postgresql/data
+      - ./config/init-table.sql:/docker-entrypoint-initdb.d/init-table.sql
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/pg-secret
       - POSTGRES_USER_FILE=/run/secrets/pg-user
@@ -54,3 +56,4 @@ services:
         timeout: 30s
         retries: 5
         start_period: 15s
+    restart: unless-stopped

@@ -12,6 +12,7 @@ import os
 
 from logging.config import dictConfig
 
+# Configure logging settings for the webapp
 dictConfig({
     'version': 1,
     'formatters': {'default': {
@@ -27,14 +28,16 @@ dictConfig({
         'handlers': ['wsgi']
     }
 })
-
+# Create Flask object that will be used for providing webapp services
 app = Flask(__name__)
+
+# Load database user and password from Docker secrets
 with open('/run/secrets/pg-user') as userfile:
     dbuser = userfile.readline().strip()
 with open('/run/secrets/pg-secret') as passfile:
     dbpass = passfile.readline().strip()
 
-
+# Configure the PostgreSQL connection for the webapp
 conn = psycopg2.connect(
         host=os.environ.get('DBHOST'),
         database=os.environ.get('DB'),
@@ -44,11 +47,17 @@ conn = psycopg2.connect(
 
 @app.route("/")
 def info():
+    """
+    Function that returns a greeting if the webapp is up and running.
+    """
     return "Hello there! Demo web app is alive! \n"
 
 
 @app.route("/insert-item", methods=['POST'])
 def insert_item():
+    """
+    Function that adds a new application to the monitoring table based on the received POST request. Check the documentation for exact details about the expected body of the POST request.
+    """
     try:
         app.logger.info("Received a POST request for adding a new item to the monitoring table with following data: " + json.dumps(request.json))
         if insert_query(request.json['appname']):
@@ -61,6 +70,9 @@ def insert_item():
 
 @app.route("/list-item/<string:application>", methods=['GET'])
 def list_item(application):
+    """
+    Function that returns all details about the specified application if it exists in the monitoring table.
+    """
     try:
         reply = list_query(application)
         return {"ID": f"{reply[0]}", "appname": f"{reply[1]}", "status": f"{reply[2]}"}
@@ -69,6 +81,9 @@ def list_item(application):
 
 @app.route("/list-items", methods=['GET'])
 def list_items():
+    """
+    Function that return all details about every application that exists in the monitoring table.
+    """
     try:
         reply = list_query(appname=None)
         ret = []
@@ -80,6 +95,9 @@ def list_items():
 
 @app.route("/get-status/<string:application>", methods=['GET'])
 def get_item_status(application):
+    """
+    Function that returns the status of the specified application if it exists in the monitoring table.
+    """
     try:
         return {"status": f"{get_status_query(appname=application)}"}
     except Exception as e:
@@ -87,6 +105,9 @@ def get_item_status(application):
 
 @app.route("/update-status", methods=['POST'])
 def update_item_status():
+    """
+    Function that updates the status of specific application based on the body of the received request. Check the webapp documentation for exact details about the expected body of the POST request.
+    """
     try:
         application = request.json["alerts"][0]["labels"]["appname"]
         if request.json["status"] == "resolved":
@@ -103,6 +124,9 @@ def update_item_status():
         app.logger.error(e)
 
 def insert_query(appname):
+    """
+    Function that performs the SQL INSERT query that adds a new application to the monitoring table.
+    """
     cur = conn.cursor()
     try:
         cur.execute(f"INSERT INTO monitoring(appname, status) VALUES ('{appname}', 'OK');")
@@ -117,6 +141,9 @@ def insert_query(appname):
         return False
     
 def list_query(appname=None):
+    """
+    Function that performs the SQL SELECT query for listing all details about the specified application or all of the applications in the table.
+    """
     cur = conn.cursor()
     try:
         if appname != None:
@@ -133,6 +160,9 @@ def list_query(appname=None):
         return "Encountered a problem while performing the select query!"
     
 def get_status_query(appname):
+    """
+    Function that performs the SQL SELECT query for obtaining status of the specified application.
+    """
     cur = conn.cursor()
     try:
         cur.execute(f"SELECT status FROM monitoring WHERE appname = '{appname}';")
@@ -147,6 +177,9 @@ def get_status_query(appname):
     
 
 def update_status_query(appname, status):
+    """
+    Function that performs the SQL UPDATE query for updating the status of specified application.
+    """
     cur = conn.cursor()
     try:
         cur.execute(f"UPDATE monitoring SET status = '{status}' WHERE appname = '{appname}';")
@@ -160,5 +193,5 @@ def update_status_query(appname, status):
         return False
     
 
-
+# Start up the flask app with waitress
 serve(app, host='0.0.0.0', port=8080)

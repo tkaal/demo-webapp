@@ -37,7 +37,9 @@ services:
     container_name: demo_nginx
     volumes:
     - {{ demo_root_dir }}/config/nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
   nginx_exporter:
     image: nginx/nginx-prometheus-exporter:latest
     container_name: nginx_exporter
     command: '-nginx.scrape-uri http://demo_nginx:80/metrics'
+    restart: unless-stopped
