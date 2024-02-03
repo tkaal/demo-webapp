@@ -4,3 +4,4 @@ do_build: true
 webapp_root_dir: /var/lib/webapp
 webapp_domain: "webapp.demo"
 webapp_host_port: 8080
+local_testing: true
