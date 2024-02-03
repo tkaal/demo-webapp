@@ -1,4 +1,7 @@
 version: '3.8'
+volumes:
+  webapp-pg-data:
+    driver: local
 networks:
   webapp:
     driver: bridge
@@ -39,7 +42,7 @@ services:
     image: postgres:15-alpine
     container_name: webapp_postgres
     volumes:
-      - ./data/pg-data:/var/lib/postgresql/data
+      - webapp-pg-data:/var/lib/postgresql/data
       - ./config/init-table.sql:/docker-entrypoint-initdb.d/init-table.sql
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/pg-secret
