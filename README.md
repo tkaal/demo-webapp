@@ -11,8 +11,7 @@ In total, there are three services in the webapp Docker compose setup:
 
 - **nginx**
 
-    nginx is used as a proxy that forwards HTTP requests to the webapp. Using nginx in front of webapp helps to keep Flask logic simpler as more complex web server configuration can be handled by nginx.
-
+    nginx is used as a proxy that forwards HTTP requests to the webapp. Using nginx in front of webapp helps to keep Flask logic simpler as more complex web server configuration can be handled by nginx. nginx is the only container that is reachable from outside of the webapp Docker network as it is bound to the configured host port. Communication with other services is contained within webapp Docker network.
 - **webapp**
 
     webapp is the Python Flask application that handles the API logic. webapp executes various SQL queries based on the incoming HTTP API requests to insert or display information about some application's health. webapp uses PostgreSQL as its database.
@@ -24,4 +23,19 @@ In total, there are three services in the webapp Docker compose setup:
     - appname (**primary key**) ---> varchar(255)
     - status ---> varchar(7) 
 
-  
+## Installation
+This repository contains two options that can be used for installing webapp:
+
+### Installation via Ansible
+Ansible playbook **webapp.yaml** can be used for automatically setting up webapp. **webapp.yaml** playbook consists of three plays, the second play is responsible for configuring and starting up webapp. 
+
+#### Prerequisites
+Installing webapp via Ansible has some prerequisites that need to met for the playbook run to be successful:
+
+- Hosts defined in webapp host group must have docker and docker compose installed
+- Hosts defined in webapp host group must have pip3 installed
+- The host that is used for running the playbook must have **community.docker** version 3.7.0 ansible collection installed. This is needed for Docker compose V2 Ansible module. The ansible package installation often comes with an older version of **community.docker** collection, but the version can be upgraded with command 
+    ```
+    ansible-galaxy collection install community.docker
+    ```
+
