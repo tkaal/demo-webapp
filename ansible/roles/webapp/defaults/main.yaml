@@ -1,6 +1,0 @@
-webapp_image_name: webapp
-webapp_image_version: v1.0
-do_build: true
-webapp_root_dir: /var/lib/webapp
-webapp_domain: "webapp.demo"
-webapp_host_port: 8080
