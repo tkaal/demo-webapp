@@ -15,7 +15,6 @@
     owner: "{{ demo_user }}"
   loop:
     - config
-    - data
 
 - name: Copy necessary configuration files
   ansible.builtin.template:

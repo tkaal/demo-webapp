@@ -15,7 +15,6 @@
     owner: "{{ webapp_user }}"
   loop:
     - config
-    - data
     - build
 
 - name: Copy files that are necessary for building the web app Docker image
