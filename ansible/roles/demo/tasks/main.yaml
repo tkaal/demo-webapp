@@ -1,0 +1,80 @@
+---
+- name: Create a directory for the demo setup to {{ demo_root_dir }} if it does not exist
+  ansible.builtin.file:
+    path: "{{ demo_root_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ demo_user }}"
+  become: yes
+
+- name: Create a directory for demo components' configuration files and data if these do not exist
+  ansible.builtin.file:
+    path: "{{ demo_root_dir }}/{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ demo_user }}"
+  loop:
+    - config
+    - data
+
+- name: Copy necessary configuration files
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ demo_root_dir }}/config/{{ item }}"
+    owner: "{{ demo_user }}"
+  loop:
+    - prometheus.yaml
+    - demo-alerts.yaml
+    - demo-datasource.yaml
+    - nginx.conf
+
+- name: Copy demo Docker compose file
+  ansible.builtin.template:
+    src: compose.yaml
+    dest: "{{ demo_root_dir }}/compose.yaml"
+    owner: "{{ demo_user }}"
+
+- name: Add webapp domain to /etc/hosts file
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ hostvars[item].ansible_default_ipv4.address }}$'
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{webapp_domain}}"
+    state: present
+  become: yes
+  with_items: "{{ groups.webapp }}"
+
+- name: Ensure that necessary pip packages are installed to be able to start up docker compose via Ansible
+  ansible.builtin.pip:
+    name:
+      - docker==7.0.0
+      - docker-compose==1.29.2
+
+- name: Create and start demo resources
+  community.docker.docker_compose_v2:
+    project_src: "{{ demo_root_dir }}"
+    files:
+      - compose.yaml
+    state: present
+  register: output
+
+- name: Verify that all of the services are running
+  ansible.builtin.assert:
+    that:
+        -  item.State  == "running"
+  with_items:
+    - "{{ output.containers }}"
+
+- name: Check if demo nginx item has been added to the demo webapp
+  ansible.builtin.uri:
+    url: "http://{{ webapp_domain }}:{{ webapp_host_port }}/get-status/nginx"
+    method: GET
+  register: get_response
+
+- name: Add demo nginx item to monitoring database if it doesn't exist yet
+  ansible.builtin.uri:
+    url: "http://{{ webapp_domain }}:{{ webapp_host_port }}/insert-item"
+    method: POST
+    body: '{"appname": "nginx"}'
+    body_format: json
+  when: get_response.json.status == "Encountered a problem while performing the select query!"
+

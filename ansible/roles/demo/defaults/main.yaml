@@ -1,0 +1,3 @@
+demo_root_dir: /var/lib/demo
+webapp_domain: "webapp.demo"
+webapp_host_port: 8080

@@ -1,0 +1,19 @@
+---
+- name: Gather facts
+  hosts: all
+  tasks:
+    - setup:
+
+- name: Prepare and start up web app
+  hosts: webapp
+  gather_facts: no
+  roles:
+    - webapp
+
+- name: Prepare and start up demo components
+  hosts: demo
+  gather_facts: no
+  roles:
+    - role: demo
+      when:
+         want_demo

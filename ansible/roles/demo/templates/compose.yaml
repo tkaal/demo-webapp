@@ -1,0 +1,43 @@
+version: '3.8'
+volumes:
+  prometheus-demo:
+    driver: local
+  grafana-demo:
+    driver: local
+services:
+  prometheus:
+    image: prom/prometheus:v2.37.9
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    volumes:
+      - {{ demo_root_dir }}/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - prometheus-demo:/prometheus
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-demo:/var/lib/grafana
+      - {{ demo_root_dir }}/config/demo-alerts.yaml:/etc/grafana/provisioning/alerting/demo-alerts.yaml
+      - {{ demo_root_dir }}/config/demo-datasource.yaml:/etc/grafana/provisioning/datasources/demo-datasource.yaml
+    restart: unless-stopped
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.5.0
+    container_name: node_exporter
+    command: '--path.rootfs=/host'
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - /:/host:ro,rslave
+  demo_nginx:
+    image: nginx:latest
+    container_name: demo_nginx
+    volumes:
+    - {{ demo_root_dir }}/config/nginx.conf:/etc/nginx/conf.d/default.conf
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    command: '-nginx.scrape-uri http://demo_nginx:80/metrics'

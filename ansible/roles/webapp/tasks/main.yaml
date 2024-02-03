@@ -1,0 +1,76 @@
+---
+- name: Create a directory for the webapp to {{ webapp_root_dir }} if it does not exist
+  ansible.builtin.file:
+    path: "{{ webapp_root_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ webapp_user }}"
+  become: yes
+
+- name: Create a directory for webapp components' configuration files and data and Docker image building if these do not exist
+  ansible.builtin.file:
+    path: "{{ webapp_root_dir }}/{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ webapp_user }}"
+  loop:
+    - config
+    - data
+    - build
+
+- name: Copy files that are necessary for building the web app Docker image
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ webapp_root_dir }}/build/{{ item }}"
+    owner: "{{ webapp_user }}"
+  loop: 
+    - Dockerfile
+    - requirements.txt
+    - webapp.py
+
+- name: Build webapp Docker image
+  community.docker.docker_image:
+    name: "{{ webapp_image_name }}:{{ webapp_image_version }}"
+    build:
+      path: "{{ webapp_root_dir }}/build"
+    source: build
+  when: do_build
+
+- name: Copy webapp related configuration files
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ webapp_root_dir }}/config/{{ item }}"
+    owner: "{{ webapp_user }}"
+  loop:
+    - init-table.sql
+    - webapp-nginx.conf
+    - pg_secret
+    - pg_user
+    
+- name: Copy webapp's Docker compose file
+  ansible.builtin.template:
+    src: compose.yaml
+    dest: "{{ webapp_root_dir }}/compose.yaml"
+    owner: "{{ webapp_user }}"
+
+- name: Ensure that necessary pip packages are installed to be able to start up docker compose via Ansible
+  ansible.builtin.pip:
+    name:
+      - docker==7.0.0
+      - docker-compose==1.29.2
+
+- name: Create and start webapp and other services related to it
+  community.docker.docker_compose_v2:
+    project_src: "{{ webapp_root_dir }}"
+    files:
+      - compose.yaml
+    state: present
+  register: output
+
+
+- name: Verify that all of the services are running
+  ansible.builtin.assert:
+    that:
+        -  item.State  == "running"
+  with_items:
+    - "{{ output.containers }}"
