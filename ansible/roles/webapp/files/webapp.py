@@ -110,6 +110,7 @@ def update_item_status():
     """
     try:
         ret = []
+        new_status = ""
         for alert in request.json["alerts"]:
             application = alert["labels"]["appname"]
             if alert["status"] == "resolved":
@@ -117,6 +118,10 @@ def update_item_status():
             if alert["status"] == "firing":
                 new_status = "PROBLEM"
             app.logger.info(f"Received status update for app {application}, changing status to {new_status}")
+            if new_status == "":
+                app.logger.error(f"No correct status defined for for app {application}, skipping update")
+                ret.append({"appname": f"{application}", "update": "failed", "message": f"Unknown status value {alert['status']}. API is expecting status 'firing' or 'resolved'"})
+                continue
             if update_status_query(appname=application,status=new_status):
                 app.logger.info(f"Successfully changed status to {new_status} for app {application}")
                 ret.append({"appname": f"{application}", "update": "success"})
