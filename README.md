@@ -10,11 +10,11 @@
   - [API guide](#api-guide)
     - [Root endpoint](#root-endpoint)
     - [Adding a new application to webapp's database](#adding-a-new-application-to-webapps-database)
-    - [List all items in webapp database](#list-all-items-in-webapp-database)
-    - [List details about a specific item in webapp database](#list-details-about-a-specific-item-in-webapp-database)
-    - [Get status of a specific item in webapp database](#get-status-of-a-specific-item-in-webapp-database)
-    - [Update the status of a specific item in webapp database](#update-the-status-of-a-specific-item-in-webapp-database)
-    - [Deleting an item from webapp database](#deleting-an-item-from-webapp-database)
+    - [List all items in webapp's database](#list-all-items-in-webapps-database)
+    - [List details about a specific item in webapp's database](#list-details-about-a-specific-item-in-webapps-database)
+    - [Get status of a specific item in webapp's database](#get-status-of-a-specific-item-in-webapps-database)
+    - [Update the status of a specific item in webapp's database](#update-the-status-of-a-specific-item-in-webapps-database)
+    - [Deleting an item from webapp's database](#deleting-an-item-from-webapps-database)
   - [Testing webapp locally with demo resources](#testing-webapp-locally-with-demo-resources)
     - [Overview of demo resources](#overview-of-demo-resources)
     - [Installing demo resources via Ansible](#installing-demo-resources-via-ansible)
@@ -109,7 +109,7 @@ The Docker compose file will build webapp image based on the provided Dockerfile
 
 ![alt text](manual_install_test.PNG)
 
-If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value.
+If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp's domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value.
 Check the API guide below to see how to communicate with webapp.
 
 ## API guide
@@ -132,12 +132,12 @@ Following webapp API endpoint can be used for adding a new application to webapp
 ```
 http://<webapp_domain>:<webapp_port>/insert-item
 ```
-The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. Value of json key **appname** will be used to insert the new item to webapp's database table. Keep in mind that webapp database uses **appname** column as the primary key meaning that no duplicates are allowed. Example payload:
+The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. The value of key **appname** will be used to insert a new item to webapp's database table. Keep in mind that webapp database uses **appname** column as the primary key, meaning that no duplicates are allowed. Example payload:
 ```
 {"appname": "testikene"}
 ```
 
-If the POST request is successful, then webapp will respond with a success message (e.g. adding new item **testikene** to webapp database):
+If the POST request is successful, then webapp will respond with a success message (e.g. adding new item **testikene** to webapp's database):
 ```
 teele@sk-demo:~$ curl -X POST http://webapp.demo:8080/insert-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
 Successfully added new application testikene to monitoring table! 
@@ -155,8 +155,8 @@ webapp container logs can be checked to see what went wrong:
 DETAIL:  Key (appname)=(testikene) already exists.
 [2024-02-04 08:54:47,144] ERROR in webapp: Encountered an error while adding new application testikene to monitoring table
 ```
-### List all items in webapp database
-Following API endpoint can be used for listing all items that exist in webapp database:
+### List all items in webapp's database
+Following API endpoint can be used for listing all items that exist in webapp's database:
 ```
 http://<webapp_domain>:<webapp_port>/list-items
 ```
@@ -168,8 +168,8 @@ teele@sk-demo:~$ curl http://webapp.demo:8080/list-items
 Listing items via browser:
 
 ![alt text](list_items.PNG)
-### List details about a specific item in webapp database
-Following API endpoint can be used for listing details about a specific item in webapp database:
+### List details about a specific item in webapp's database
+Following API endpoint can be used for listing details about a specific item in webapp's database:
 ```
 http://<webapp_domain>:<webapp_port>/list-item/<appname>
 ```
@@ -181,8 +181,8 @@ teele@sk-demo:~/repo/demo-webapp$ curl http://webapp.demo:8080/list-item/testike
 Listing details about app **testikene** via browser:
 
 ![alt text](list_specific_item.PNG)
-### Get status of a specific item in webapp database
-Following API endpoint dan be used for requesting status of the specified item:
+### Get status of a specific item in webapp's database
+Following API endpoint can be used for requesting status of the specified item:
 ```
 http://<webapp_domain>:<webapp_port>/get-status/<appname>
 ```
@@ -195,16 +195,16 @@ Requesting the status of application **testikene** via browser:
 
 ![alt text](get_status.PNG)
 
-### Update the status of a specific item in webapp database
-Following API endpoint can be used for updating the value of column **status** for the specified item in webapp database via HTTP POST request:
+### Update the status of a specific item in webapp's database
+Following API endpoint can be used for updating the value of column **status** for the specified item in webapp's database via HTTP POST request:
 ```
 http://<webapp_domain>:<webapp_port>/update-status
 ```
-The logic of status updating was written to be compatible with Grafana alerting via webhook (more details about Grafana alert json body structure can be found from https://prometheus.io/docs/alerting/latest/configuration/#webhook_config). This means that the HTTP POST requests sent to this endpoint should follow some rules:
-  - json body should have key **alerts** which is a list of dictionaries
+The logic of status updating was written to be compatible with Grafana alerting via webhook (more details about Grafana alert json body structure can be found from https://prometheus.io/docs/alerting/latest/configuration/#webhook_config). This means that HTTP POST requests sent to this endpoint should follow some rules:
+  - json body contain key **alerts** which is a list of dictionaries
   - dictionaries in **alerts** list should contain following information:
     -  key **status** (string) ---> to change the item status in database to PROBLEM, set the value of **status** key to "firing". To change the item status in database to OK, set the value of **status** key to "resolved". If some other value is specified, then API will skip this item.
-    - key **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp database as this value is used during the SQL UPDATE query for identifying the correct application
+    - key **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp's database as this value is used during the SQL UPDATE query for identifying the correct application.
 - example payload for changing the status of application **testikene** to PROBLEM:
   ```
    {"alerts": [{"status": "firing", "labels": {"appname": "testikene"}}]}
@@ -216,7 +216,7 @@ Sending a HTTP POST request via CLI to change status of **testikene** to PROBLEM
 teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/update-status -H 'Content-Type: application/json' -d '{"alerts": [{"status": "firing", "labels": {"appname": "testikene"}}]}'
 [{"appname":"testikene","update":"success"}]   
 ``` 
-Checking the status of **testikene** after updating the status:
+Checking the status of **testikene** after updating its status:
 ```
 teele@sk-demo:~/repo/demo-webapp/ansible$ curl http://webapp.demo:8080/get-status/testikene
 {"status":"PROBLEM"} 
@@ -228,16 +228,16 @@ teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/u
 teele@sk-demo:~/repo/demo-webapp/ansible$ curl http://webapp.demo:8080/get-status/testikene
 {"status":"OK"}
 ``` 
-### Deleting an item from webapp database
-Following API endpoint can be used for removing an item from webapp database via HTTP POST request:
+### Deleting an item from webapp's database
+Following API endpoint can be used for removing an item from webapp's database via HTTP POST request:
 ```
 http://<webapp_domain>:<webapp_port>/delete-item
 ```
-The API endpoint is expecting a HTTP POST request with json body that contains key appname. Value of json key appname will be used in SQL DELETE query. Example payload:
+The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. Value of key **appname** will be used in SQL DELETE query. Example payload:
 ```
 {"appname": "testikene"}
 ```
-Removing item **testikene** from webapp database via CLI:
+Removing item **testikene** from webapp's database via CLI:
 ```
 teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/delete-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
 Successfully removed application testikene from webapp database!

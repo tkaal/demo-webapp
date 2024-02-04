@@ -1,15 +1,9 @@
 from flask import Flask
-
 from flask import request
-
 from waitress import serve
-
 import psycopg2
-
 import json
-
 import os
-
 from logging.config import dictConfig
 
 # Configure logging settings for the webapp
