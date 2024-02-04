@@ -24,14 +24,6 @@ services:
       - {{ demo_root_dir }}/config/demo-alerts.yaml:/etc/grafana/provisioning/alerting/demo-alerts.yaml
       - {{ demo_root_dir }}/config/demo-datasource.yaml:/etc/grafana/provisioning/datasources/demo-datasource.yaml
     restart: unless-stopped
-  node_exporter:
-    image: quay.io/prometheus/node-exporter:v1.5.0
-    container_name: node_exporter
-    command: '--path.rootfs=/host'
-    pid: host
-    restart: unless-stopped
-    volumes:
-      - /:/host:ro,rslave
   demo_nginx:
     image: nginx:latest
     container_name: demo_nginx

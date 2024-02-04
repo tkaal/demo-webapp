@@ -15,7 +15,11 @@
     - [Get status of a specific item in webapp database](#get-status-of-a-specific-item-in-webapp-database)
     - [Update the status of a specific item in webapp database](#update-the-status-of-a-specific-item-in-webapp-database)
     - [Deleting an item from webapp database](#deleting-an-item-from-webapp-database)
-  - [Testing webapp locally with provided demo resources](#testing-webapp-locally-with-provided-demo-resources)
+  - [Testing webapp locally with demo resources](#testing-webapp-locally-with-demo-resources)
+    - [Overview of demo resources](#overview-of-demo-resources)
+    - [Installing demo resources via Ansible](#installing-demo-resources-via-ansible)
+      - [Prerequisites](#prerequisites-1)
+      - [Preparations](#preparations-1)
 
 ## Overview
 This is a simple proof-of-concept Python Flask application **webapp** that can be used for monitoring the statuses of other applications. webapp is set up with Docker compose and it exposes an API that can be used for communicating with the application. This API can be used for obtaining or updating the status of some application via HTTP requests. These requests can be done manually, but it is also possible to use webapp API as a webhook for some other platform. For example, it can be used as a contact point for Grafana alerts.
@@ -236,4 +240,38 @@ Removing item **testikene** from webapp database via CLI:
 teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/delete-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
 Successfully removed application testikene from webapp database!
 ```
-## Testing webapp locally with provided demo resources
+## Testing webapp locally with demo resources
+This repository also provides demo resources that can be used for locally testing webapp. These demo resources can be deployed with Ansible.
+
+### Overview of demo resources
+The demo resources are deployed with Docker compose file which starts up following services:
+- **prometheus**
+ 
+  prometheus service will be used as the datasource for grafana, it will be exposing metrics of demo_nginx service.
+- **grafana**
+
+  grafana service will bind to host port 3000 and will be accessible via url http://localhost:3000. Docker compose will automatically provision the alert rule, the webapp contact point and the notification policy that can be used for testing webapp with Grafana.
+- **demo_nginx**
+  
+  demo_nginx will be started up as a dummy service for quick testing, it won't be actually serving any application.
+- **nginx_exporter**
+  
+  nginx-exporter service will be forwarding demo_nginx metrics to prometheus service.
+### Installing demo resources via Ansible
+Demo resources can be automatically started up and prepared for quick testing via Ansible.
+#### Prerequisites
+ Installing demo resources via Ansible has some prerequisites that need to be met for the playbook run to be successful:
+- Hosts defined in **demo** host group must have docker and docker compose installed. The prepared **./ansible/hosts** file is using localhost as the target.
+- Hosts defined in **demo** host group must have pip3 installed
+- The host that is used for running the playbook must have **community.docker** version 3.7.0 ansible collection installed. This is needed for Docker compose V2 Ansible module. The ansible package installation often comes with an older version of **community.docker** collection, but the version can be upgraded with command 
+    ```
+    ansible-galaxy collection install community.docker --upgrade
+    ```
+- The configured user for **demo** hosts must have necessary permissions for executing docker commands. If no user is explicitly defined for **demo** hosts, then Ansible will use the user that is executing the playbook by default.
+#### Preparations
+Before the playbook can be executed, following preparations need to be done:
+  - Set the value of variable **want_demo** to true in **./ansible/group_vars/all.yaml**
+  - Define value for variable **demo_user** (location **./ansible/group_vars/demo.yaml**). This user will be configured as the owner of files related to demo resources
+  - If you did **NOT** use default values for webapp's domain (default webapp.demo) and host port (default 8080), then specify the correct values with variables **webapp_domain** and **webapp_host_port** in file **./ansible/group_vars/demo.yaml** or **./ansible/group_vars/all.yaml**.
+  
+    If default values for webapp were used, then it is not necessary to define these variables.
