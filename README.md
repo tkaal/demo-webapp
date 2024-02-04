@@ -252,7 +252,7 @@ The demo resources are deployed with Docker compose file which starts up followi
   prometheus service will be used as the datasource for grafana, it will be exposing metrics of demo_nginx service.
 - **grafana**
 
-  grafana service will bind to host port 3000 and will be accessible via url http://localhost:3000. Docker compose will automatically provision the alert rule, the webapp contact point and the notification policy that can be used for testing webapp with Grafana.
+  grafana service will bind to host port 3000 and will be accessible via URL http://localhost:3000. Docker compose will automatically provision the alert rule, the webapp contact point and the notification policy that can be used for testing webapp with Grafana.
 - **demo_nginx**
   
   demo_nginx will be started up as a dummy service for quick testing, it won't be actually serving any application.
