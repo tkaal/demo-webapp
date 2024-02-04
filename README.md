@@ -20,6 +20,8 @@
     - [Installing demo resources via Ansible](#installing-demo-resources-via-ansible)
       - [Prerequisites](#prerequisites-1)
       - [Preparations](#preparations-1)
+    - [Running the playbook](#running-the-playbook-1)
+    - [Testing webapp with demo resources](#testing-webapp-with-demo-resources)
 
 ## Overview
 This is a simple proof-of-concept Python Flask application **webapp** that can be used for monitoring the statuses of other applications. webapp is set up with Docker compose and it exposes an API that can be used for communicating with the application. This API can be used for obtaining or updating the status of some application via HTTP requests. These requests can be done manually, but it is also possible to use webapp API as a webhook for some other platform. For example, it can be used as a contact point for Grafana alerts.
@@ -273,5 +275,55 @@ Before the playbook can be executed, following preparations need to be done:
   - Set the value of variable **want_demo** to true in **./ansible/group_vars/all.yaml**
   - Define value for variable **demo_user** (location **./ansible/group_vars/demo.yaml**). This user will be configured as the owner of files related to demo resources
   - If you did **NOT** use default values for webapp's domain (default webapp.demo) and host port (default 8080), then specify the correct values with variables **webapp_domain** and **webapp_host_port** in file **./ansible/group_vars/demo.yaml** or **./ansible/group_vars/all.yaml**.
-  
-    If default values for webapp were used, then it is not necessary to define these variables.
+  If default values for webapp were used, then it is not necessary to define these variables.
+### Running the playbook
+If the preparations have been done, then the demo resources can be deployed by running **webapp.yaml** playbook. If you wish to skip the webapp play, then use parameter **-t demo** when running the playbook:
+```
+ansible-playbook webapp.yaml -t demo 
+```
+Demo resources are created and started up by the third play in **webapp.yaml** playbook. All files related to demo components will be copied to **/var/lib/demo** by default. This location can be changes by defining the preferred destination with variable **demo_root_dir**.
+
+### Testing webapp with demo resources
+When the playbook run has finished, Grafana UI should be accessible via URL http://localhost:3000. It is possible to log in to Grafana with built-in user **admin** and its default password **admin**. Ansible has already prepared Prometheus datasource (using prometheus service from compose), webhook contact point that refers to webapp's status update endpoint, an alert rule that goes into problem state when demo_nginx isn't running and a notification policy that binds the demo_nginx alert rule to the webapp contact point. 
+
+The pre-made demo_nginx alert rule has label **appname** configured, this label needs to be added to all Grafana alert rules that need to use webapp's webhook as their contact point as webapp uses it to determine which application's status should be updated. 
+The demo_nginx alert rule's status should be in normal state after the demo services have started up:
+
+piltsiia
+
+Ansible also ensures that **nginx** item exists in webapp's database:
+
+piltsiia
+
+To test Grafana and webapp intergation, stop demo_nginx container:
+```
+docker stop demo_nginx
+```
+This will cause demo_nginx alert rule to switch to firing state in a minute or two (evaluation frequency has been set to 1 minute).
+
+piltsiia
+
+Keep an eye on webapp's contact point. After demo_nginx alert has gone into firing state, Grafana should soon send out the notification which will be visible under webapp's contact point (Last delivery attempt). It may take a few minutes. If no message about failed delivery is displayed under webapp's contact point, then it means that the attempt was successful.
+
+piltsiia
+
+After Grafana shows that the alert has been sent out, it can be seen that webapp also displays that nginx's status is in **PROBLEM** state:
+
+piltsiia
+
+To test changing the status back to normal via Grafana, start demo_nginx container:
+```
+docker start demo_nginx
+```
+The status of demo_nginx alert will return to normal after a minute or two and webapp's contact point will be triggered shortly after. webapp should now display "OK" status for nginx:
+
+piltsiia
+
+Traces of Grafana --> webapp communication can also be seen from webapp's logs:
+```
+teele@sk-demo:~/repo/demo-webapp/ansible$ docker logs -n 4 webapp
+[2024-02-04 18:29:30,027] INFO in webapp: Received status update for app nginx, changing status to PROBLEM
+[2024-02-04 18:29:30,031] INFO in webapp: Successfully changed status to PROBLEM for app nginx
+[2024-02-04 18:36:30,032] INFO in webapp: Received status update for app nginx, changing status to OK
+[2024-02-04 18:36:30,035] INFO in webapp: Successfully changed status to OK for app nginx
+```

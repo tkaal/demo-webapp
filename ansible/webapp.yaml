@@ -12,8 +12,9 @@
 
 - name: Prepare and start up demo components
   hosts: demo
-  gather_facts: no
   roles:
     - role: demo
       when:
          want_demo
+  tags:
+    - demo
