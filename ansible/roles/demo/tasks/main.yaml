@@ -7,14 +7,12 @@
     owner: "{{ demo_user }}"
   become: yes
 
-- name: Create a directory for demo components' configuration files and data if these do not exist
+- name: Create a directory for demo components' configuration files if it does not exist
   ansible.builtin.file:
-    path: "{{ demo_root_dir }}/{{ item }}"
+    path: "{{ demo_root_dir }}/config"
     state: directory
     mode: '0755'
     owner: "{{ demo_user }}"
-  loop:
-    - config
 
 - name: Copy necessary configuration files
   ansible.builtin.template:
