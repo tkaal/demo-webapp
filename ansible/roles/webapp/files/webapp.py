@@ -114,7 +114,7 @@ def update_item_status():
             application = alert["labels"]["appname"]
             if alert["status"] == "resolved":
                 new_status = "OK"
-            else:
+            if alert["status"] == "firing":
                 new_status = "PROBLEM"
             app.logger.info(f"Received status update for app {application}, changing status to {new_status}")
             if update_status_query(appname=application,status=new_status):

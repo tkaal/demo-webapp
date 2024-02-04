@@ -194,7 +194,7 @@ The logic of status updating was written to be compatible with Grafana alerting 
   - json body should have key **alerts** which is a list of dictionaries
   - dictionaries in **alerts** list should contain following information:
     -  key **status** (string) ---> to change the item status in database to PROBLEM, set the value of **status** key to "firing". To change the item status in database to OK, set the value of **status** key to "resolved"
-    - key **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp database at this value is used during the SQL UPDATE query for identifying the correct application
+    - key **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp database as this value is used during the SQL UPDATE query for identifying the correct application
 - example payload for changing the status of application **testikene** to PROBLEM:
   ```
    {"alerts": [{"status": "firing", "labels": {"appname": "testikene"}}]}
