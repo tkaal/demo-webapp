@@ -289,11 +289,11 @@ When the playbook run has finished, Grafana UI should be accessible via URL http
 The pre-made demo_nginx alert rule has label **appname** configured, this label needs to be added to all Grafana alert rules that need to use webapp's webhook as their contact point as webapp uses it to determine which application's status should be updated. 
 The demo_nginx alert rule's status should be in normal state after the demo services have started up:
 
-piltsiia
+![alt text](demo_alert_rule.PNG)
 
 Ansible also ensures that **nginx** item exists in webapp's database:
 
-piltsiia
+![alt text](nginx_item_added_demo.PNG)
 
 To test Grafana and webapp intergation, stop demo_nginx container:
 ```
@@ -301,25 +301,23 @@ docker stop demo_nginx
 ```
 This will cause demo_nginx alert rule to switch to firing state in a minute or two (evaluation frequency has been set to 1 minute).
 
-piltsiia
+![alt text](demo_rule_alerting.PNG)
 
 Keep an eye on webapp's contact point. After demo_nginx alert has gone into firing state, Grafana should soon send out the notification which will be visible under webapp's contact point (Last delivery attempt). It may take a few minutes. If no message about failed delivery is displayed under webapp's contact point, then it means that the attempt was successful.
 
-piltsiia
+![alt text](contact_point_activated.PNG)
 
 After Grafana shows that the alert has been sent out, it can be seen that webapp also displays that nginx's status is in **PROBLEM** state:
 
-piltsiia
+![alt text](nginx_to_problem.PNG)
 
 To test changing the status back to normal via Grafana, start demo_nginx container:
 ```
 docker start demo_nginx
 ```
-The status of demo_nginx alert will return to normal after a minute or two and webapp's contact point will be triggered shortly after. webapp should now display "OK" status for nginx:
+The status of demo_nginx alert will return to normal after a minute or two and webapp's contact point will be triggered shortly after. webapp should now display "OK" status for nginx.
 
-piltsiia
-
-Traces of Grafana --> webapp communication can also be seen from webapp's logs:
+Traces of Grafana and webapp communication can also be seen from webapp's logs:
 ```
 teele@sk-demo:~/repo/demo-webapp/ansible$ docker logs -n 4 webapp
 [2024-02-04 18:29:30,027] INFO in webapp: Received status update for app nginx, changing status to PROBLEM
