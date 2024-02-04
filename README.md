@@ -40,7 +40,7 @@ This repository contains two options that can be used for installing webapp:
 Ansible playbook **webapp.yaml** can be used for automatically setting up webapp locally, all necessary files can be found from directory **ansible**.  
 
 #### Prerequisites
-Installing webapp via Ansible has some prerequisites that need to met for the playbook run to be successful:
+Installing webapp via Ansible has some prerequisites that need to be met for the playbook run to be successful:
 
 - Hosts defined in **webapp** host group must have docker and docker compose installed. The prepared **./ansible/hosts** file is using localhost as the target.
 - Hosts defined in **webapp** host group must have pip3 installed
@@ -75,7 +75,7 @@ Here is a little summary about what the playbook will do:
    3. By default, Ansible will use image name **webapp** and tag **v1.0**. These can be changed by defining variables **webapp_image_name** and **webapp_image_version** in **./ansible/group_vars/webapp.yaml**. 
    4. By default, webapp will be exposed to the public with domain name **webapp.demo**. This domain name can be changed by defining variable **webapp_domain** in **./ansible/group_vars/webapp.yaml**
    5. By default, nginx will bind to host port 8080. This can be changed by defining variable **webapp_host_port** in **./ansible/group_vars/webapp.yaml**.
-   6. The prepared Ansible setup is meant for starting up proof-of-concept version of webapp locally. Therefore it assumes that system wide DNS hasn't been set up for webapp domain and adds an entry to /etc/hosts file to resolve the webapp domain name. This task can be skipped by setting variable **local_testing** to false in **./ansible/group_vars/webapp.yaml**
+   6. The prepared Ansible setup is meant for starting up proof-of-concept version of webapp locally. Therefore it assumes that system-wide DNS hasn't been set up for webapp domain and adds an entry to /etc/hosts file to resolve the webapp domain name. This task can be skipped by setting variable **local_testing** to false in **./ansible/group_vars/webapp.yaml**
 3. Third play is optional and is disabled by default. If it is enabled, then the third play will prepare and start up resources that can be used for testing webapp. More details about these demo resources and testing webapp can be found below.
 
 When the playbook has finished, then it should be possible to access webapp via URLs http://localhost:HOSTPORT (http://localhost:8080 by default) and http://WEBAPPDOMAIN:HOSTPORT (http://webapp.demo:8080 by default). Following message and web page should be shown, if webapp is up and running: 
@@ -88,18 +88,15 @@ Another option for installing webapp is deploying it manually. All necessary fil
 - Copy the manual-deploy directory to a suitable destination 
 - Configure database user for webapp by writing the username to file **./manual-deploy/config/pg_user**. This file will be used to create Docker secret **pg-user** that webapp and webapp-postgres services are using.
 - Configure database password for webapp by writing the password to file **./manual-deploy/config/pg_secret**. This file will be used to create Docker secret **pg-secret** that webapp and webapp-postgres services are using.
-- Start up the Docker compose setup in detached mode with command while being in the directory:
+- Start up the Docker compose setup in detached mode while being in the directory:
 ```
    docker compose up -d
 ```
-The Docker compose file will build webapp image based on Dockerfile located in the directory and will start up all services. After docker compose command has finished, webapp should be accessible via URL http://localhost:8080 and display following message:
+The Docker compose file will build webapp image based on the provided Dockerfile and will start up all services. After docker compose command has finished, webapp should be accessible via URL http://localhost:8080 and display following message:
 
 ![alt text](manual_install_test.PNG)
 
-If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value and execute following command inside the manual installation directory:
-```
-   docker compose restart
-```
+If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value.
 Check the API guide below to see how to communicate with webapp.
 
 ## API guide

@@ -7,7 +7,7 @@
     owner: "{{ webapp_user }}"
   become: yes
 
-- name: Create a directory for webapp components' configuration files and data and Docker image building if these do not exist
+- name: Create a directory for webapp components' configuration files and Docker image building if these do not exist
   ansible.builtin.file:
     path: "{{ webapp_root_dir }}/{{ item }}"
     state: directory
