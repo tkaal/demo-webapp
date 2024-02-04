@@ -93,8 +93,8 @@ Check the API guide below to see how to communicate with webapp.
 ### Manual installation
 Another option for installing webapp is deploying it manually. All necessary files can be found from directory **manual-deploy**. Following steps need to be done to perform manual installation of webapp:
 - Copy the manual-deploy directory to a suitable destination 
-- Configure database user for webapp by writing the username to file **./manual-deploy/config/pg_user**. This file will be used to create Docker secret **pg-user** that webapp and webapp-postgres services are using.
-- Configure database password for webapp by writing the password to file **./manual-deploy/config/pg_secret**. This file will be used to create Docker secret **pg-secret** that webapp and webapp-postgres services are using.
+- Configure database user for webapp by changing the username in file **./manual-deploy/config/pg_user**. This file will be used to create Docker secret **pg-user** that webapp and webapp-postgres services are using.  
+- Configure database password for webapp by changing the password in file **./manual-deploy/config/pg_secret**. This file will be used to create Docker secret **pg-secret** that webapp and webapp-postgres services are using.
 - Start up the Docker compose setup in detached mode while being in the directory:
 ```
    docker compose up -d
