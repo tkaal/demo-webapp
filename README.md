@@ -8,6 +8,8 @@
       - [Running the playbook](#running-the-playbook)
     - [Manual installation](#manual-installation)
   - [API guide](#api-guide)
+    - [Root endpoint](#root-endpoint)
+    - [Adding a new application to webapp's database](#adding-a-new-application-to-webapps-database)
   - [Testing webapp locally with provided demo resources](#testing-webapp-locally-with-provided-demo-resources)
 
 ## Overview
@@ -100,5 +102,41 @@ If you wish to test accessing webapp via the domain name defined in nginx config
 Check the API guide below to see how to communicate with webapp.
 
 ## API guide
-
+In total, webapp exposes six API endpoints:
+### Root endpoint
+Root endpoint displays a greeting message if webapp is up and accessible.
+```
+ http://<webapp_domain>:<webapp_host_port>
+```
+Sending a HTTP request to root endpoint via CLI:
+```
+teele@sk-demo:~$ curl http://webapp.demo:8080
+Hello there! Demo web app is alive! 
+```
+Accessing root endpoint via browser:
+![alt text](webapp_up.PNG)
+### Adding a new application to webapp's database
+Following webapp API endpoint can be used for adding a new application to webapp's database via HTTP POST request:
+```
+http://<webapp_domain>:<webapp_port>/insert-item
+```
+The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. Value of json key **appname** will be used to insert the new item to webapp's database table. Keep in mind that webapp database uses **appname** column as the primary key meaning that no duplicates are allowed.
+If the POST request is successful, then webapp will respond with a success message:
+```
+teele@sk-demo:~$ curl -X POST http://webapp.demo:8080/insert-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
+Successfully added new application testikene to monitoring table! 
+```
+If the POST request fails, then webapp will respond with a general failure message:
+```
+teele@sk-demo:~$ curl -X POST http://webapp.demo:8080/insert-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
+Encountered an error while adding new application testikene to monitoring table 
+```
+webapp container logs can be checked to see what went wrong:
+```
+[2024-02-04 08:54:47,140] INFO in webapp: Received a POST request for adding a new item to the monitoring table with following data: {"appname": "testikene"}
+[2024-02-04 08:54:47,143] ERROR in webapp: Encountered an error while inserting the new item: 
+[2024-02-04 08:54:47,144] ERROR in webapp: duplicate key value violates unique constraint "monitoring_pkey"
+DETAIL:  Key (appname)=(testikene) already exists.
+[2024-02-04 08:54:47,144] ERROR in webapp: Encountered an error while adding new application testikene to monitoring table
+```
 ## Testing webapp locally with provided demo resources
