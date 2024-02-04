@@ -281,7 +281,7 @@ If the preparations have been done, then the demo resources can be deployed by r
 ```
 ansible-playbook webapp.yaml -t demo 
 ```
-Demo resources are created and started up by the third play in **webapp.yaml** playbook. All files related to demo components will be copied to **/var/lib/demo** by default. This location can be changes by defining the preferred destination with variable **demo_root_dir**.
+Demo resources are created and started up by the third play in **webapp.yaml** playbook. All files related to demo components will be copied to **/var/lib/demo** by default. This location can be changed by defining the preferred destination with variable **demo_root_dir**.
 
 ### Testing webapp with demo resources
 When the playbook run has finished, Grafana UI should be accessible via URL http://localhost:3000. It is possible to log in to Grafana with built-in user **admin** and its default password **admin**. Ansible has already prepared Prometheus datasource (using prometheus service from compose), webhook contact point that refers to webapp's status update endpoint, an alert rule that goes into problem state when demo_nginx isn't running and a notification policy that binds the demo_nginx alert rule to the webapp contact point. 
@@ -295,7 +295,7 @@ Ansible also ensures that **nginx** item exists in webapp's database:
 
 ![alt text](./images/nginx_item_added_demo.PNG)
 
-To test Grafana and webapp intergation, stop demo_nginx container:
+To test Grafana and webapp integration, stop demo_nginx container:
 ```
 docker stop demo_nginx
 ```
