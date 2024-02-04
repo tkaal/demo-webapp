@@ -284,7 +284,7 @@ ansible-playbook webapp.yaml -t demo
 Demo resources are created and started up by the third play in **webapp.yaml** playbook. All files related to demo components will be copied to **/var/lib/demo** by default. This location can be changed by defining the preferred destination with variable **demo_root_dir**.
 
 ### Testing webapp with demo resources
-When the playbook run has finished, Grafana UI should be accessible via URL http://localhost:3000. It is possible to log in to Grafana with built-in user **admin** and its default password **admin**. Ansible has already prepared Prometheus datasource (using prometheus service from compose), webhook contact point that refers to webapp's status update endpoint, an alert rule that goes into problem state when demo_nginx isn't running and a notification policy that binds the demo_nginx alert rule to the webapp contact point. 
+When the playbook run has finished, Grafana UI should be accessible via URL http://localhost:3000. It is possible to log in to Grafana with built-in user **admin** and its default password **admin**. Ansible has already prepared Prometheus datasource (using prometheus service from compose), webhook contact point that refers to webapp's status update endpoint, an alert rule that goes into problem state when demo_nginx isn't running and a notification policy that binds demo_nginx alert rule to webapp contact point. 
 
 The pre-made demo_nginx alert rule has label **appname** configured, this label needs to be added to all Grafana alert rules that need to use webapp's webhook as their contact point as webapp uses it to determine which application's status should be updated. 
 The demo_nginx alert rule's status should be in normal state after the demo services have started up:
