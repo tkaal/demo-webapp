@@ -30,7 +30,7 @@ The webapp setup consists of three Docker containers running in webapp Docker ne
 
 ![alt text](./images/webapp.png)
 
-In total, there are three services in the webapp Docker compose setup:
+In total, there are three services in webapp's Docker compose setup:
 
 - **nginx**
 
