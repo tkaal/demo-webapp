@@ -31,7 +31,7 @@ with open('/run/secrets/pg-user') as userfile:
 with open('/run/secrets/pg-secret') as passfile:
     dbpass = passfile.readline().strip()
 
-# Configure the PostgreSQL connection for the webapp
+# Configure the PostgreSQL connection for webapp
 conn = psycopg2.connect(
         host=os.environ.get('DBHOST'),
         database=os.environ.get('DB'),
@@ -42,7 +42,7 @@ conn = psycopg2.connect(
 @app.route("/")
 def info():
     """
-    Function that returns a greeting if the webapp is up and running.
+    Function that returns a greeting if webapp is up and running.
     """
     return "Hello there! Demo web app is alive! \n"
 
@@ -65,7 +65,7 @@ def insert_item():
 @app.route("/delete-item", methods=['POST'])
 def delete_item():
     """
-    Function that aremoves an application from the monitoring table based on the received POST request. Check the documentation for exact details about the expected body of the POST request.
+    Function that removes an application from the monitoring table based on the received POST request. Check the documentation for exact details about the expected body of the POST request.
     """
     try:
         app.logger.info("Received a POST request for deleting an entry from monitoring table with following data: " + json.dumps(request.json))
