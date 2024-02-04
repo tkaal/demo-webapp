@@ -258,7 +258,7 @@ The demo resources are deployed with Docker compose file which starts up followi
   demo_nginx will be started up as a dummy service for quick testing, it won't be actually serving any application.
 - **nginx_exporter**
   
-  nginx-exporter service will be forwarding demo_nginx metrics to prometheus service.
+  nginx_exporter service will be forwarding demo_nginx metrics to prometheus service.
 ### Installing demo resources via Ansible
 Demo resources can be automatically started up and prepared for quick testing via Ansible.
 #### Prerequisites
