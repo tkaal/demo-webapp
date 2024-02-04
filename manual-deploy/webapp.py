@@ -68,6 +68,21 @@ def insert_item():
     except Exception as e:
         app.logger.error(e)
 
+@app.route("/delete-item", methods=['POST'])
+def delete_item():
+    """
+    Function that aremoves an application from the monitoring table based on the received POST request. Check the documentation for exact details about the expected body of the POST request.
+    """
+    try:
+        app.logger.info("Received a POST request for deleting an entry from monitoring table with following data: " + json.dumps(request.json))
+        if delete_query(request.json['appname']):
+            app.logger.info(f"Successfully removed app {request.json['appname']} from webapp database")
+            return f"Successfully removed application {request.json['appname']} from webapp database! \n"
+        app.logger.error(f"Encountered an error while removing application {request.json['appname']}")
+        return f"Encountered an error while removing application {request.json['appname']} from webapp database \n"
+    except Exception as e:
+        app.logger.error(e)
+
 @app.route("/list-item/<string:application>", methods=['GET'])
 def list_item(application):
     """
@@ -192,6 +207,22 @@ def update_status_query(appname, status):
     cur = conn.cursor()
     try:
         cur.execute(f"UPDATE monitoring SET status = '{status}' WHERE appname = '{appname}';")
+        conn.commit()
+        cur.close()
+        return True
+    except Exception as e:
+        app.logger.error(e)
+        conn.rollback()
+        cur.close()
+        return False
+    
+def delete_query(appname):
+    """
+    Function that performs the SQL DELETE query for removing the specified item from the table.
+    """
+    cur = conn.cursor()
+    try:
+        cur.execute(f"DELETE FROM monitoring WHERE appname = '{appname}';")
         conn.commit()
         cur.close()
         return True
