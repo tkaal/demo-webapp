@@ -109,17 +109,21 @@ def update_item_status():
     Function that updates the status of specific application based on the body of the received request. Check the webapp documentation for exact details about the expected body of the POST request.
     """
     try:
-        application = request.json["alerts"][0]["labels"]["appname"]
-        if request.json["status"] == "resolved":
-            new_status = "OK"
-        else:
-            new_status = "PROBLEM"
-        app.logger.info(f"Received status update for app {application}, changing status to {new_status}")
-        if update_status_query(appname=application,status=new_status):
-            app.logger.info(f"Successfully changed status to {new_status} for app {application}")
-            return {"status": "success"}, 200
-        app.logger.error(f"Failed to change status to {new_status} for app {application}")
-        return {"status": "failed"}, 200
+        ret = []
+        for alert in request.json["alerts"]:
+            application = alert["labels"]["appname"]
+            if alert["status"] == "resolved":
+                new_status = "OK"
+            else:
+                new_status = "PROBLEM"
+            app.logger.info(f"Received status update for app {application}, changing status to {new_status}")
+            if update_status_query(appname=application,status=new_status):
+                app.logger.info(f"Successfully changed status to {new_status} for app {application}")
+                ret.append({"appname": f"{application}", "update": "success"})
+            else:
+                app.logger.error(f"Failed to change status to {new_status} for app {application}")
+                ret.append({"appname": f"{application}", "update": "failed"})
+        return ret, 200
     except Exception as e:
         app.logger.error(e)
 

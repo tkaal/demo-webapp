@@ -10,6 +10,10 @@
   - [API guide](#api-guide)
     - [Root endpoint](#root-endpoint)
     - [Adding a new application to webapp's database](#adding-a-new-application-to-webapps-database)
+    - [List all items in webapp database](#list-all-items-in-webapp-database)
+    - [List details about a specific item in webapp database](#list-details-about-a-specific-item-in-webapp-database)
+    - [Get status of a specific item in webapp database](#get-status-of-a-specific-item-in-webapp-database)
+    - [Update the status of a specific item in webapp database](#update-the-status-of-a-specific-item-in-webapp-database)
   - [Testing webapp locally with provided demo resources](#testing-webapp-locally-with-provided-demo-resources)
 
 ## Overview
@@ -122,7 +126,8 @@ Following webapp API endpoint can be used for adding a new application to webapp
 http://<webapp_domain>:<webapp_port>/insert-item
 ```
 The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. Value of json key **appname** will be used to insert the new item to webapp's database table. Keep in mind that webapp database uses **appname** column as the primary key meaning that no duplicates are allowed.
-If the POST request is successful, then webapp will respond with a success message:
+
+If the POST request is successful, then webapp will respond with a success message (e.g. adding new item **testikene** to webapp database):
 ```
 teele@sk-demo:~$ curl -X POST http://webapp.demo:8080/insert-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
 Successfully added new application testikene to monitoring table! 
@@ -140,4 +145,78 @@ webapp container logs can be checked to see what went wrong:
 DETAIL:  Key (appname)=(testikene) already exists.
 [2024-02-04 08:54:47,144] ERROR in webapp: Encountered an error while adding new application testikene to monitoring table
 ```
+### List all items in webapp database
+Following API endpoint can be used for listing all items that exist in webapp database:
+```
+http://<webapp_domain>:<webapp_port>/list-items
+```
+Listing items via CLI:
+```
+teele@sk-demo:~$ curl http://webapp.demo:8080/list-items
+[{"ID":"1","appname":"nginx","status":"OK"},{"ID":"2","appname":"testikene","status":"OK"},{"ID":"4","appname":"anotheritem","status":"OK"}]
+```
+Listing items via browser:
+
+![alt text](list_items.PNG)
+### List details about a specific item in webapp database
+Following API endpoint can be used for listing details about a specific item in webapp database:
+```
+http://<webapp_domain>:<webapp_port>/list-item/<appname>
+```
+Listing details about app **testikene** via CLI:
+```
+teele@sk-demo:~/repo/demo-webapp$ curl http://webapp.demo:8080/list-item/testikene
+{"ID":"2","appname":"testikene","status":"OK"}
+```
+Listing details about app **testikene** via browser:
+
+![alt text](list_specific_item.PNG)
+### Get status of a specific item in webapp database
+Following API endpoint dan be used for requesting status of the specified item:
+```
+http://<webapp_domain>:<webapp_port>/get-status/<appname>
+```
+Requesting the status of application **testikene** via CLI:
+```
+teele@sk-demo:~/repo/demo-webapp$ curl http://webapp.demo:8080/get-status/testikene
+{"status":"OK"}
+```
+Requesting the status of application **testikene** via browser:
+
+![alt text](get_status.PNG)
+
+### Update the status of a specific item in webapp database
+Following API endpoint can be used for updating the value of column **status** for the specified item in webapp database via HTTP POST request:
+```
+http://<webapp_domain>:<webapp_port>/update-status
+```
+The logic of status updating was written to be compatible with Grafana alerting via webhook (more details about Grafana alert json body structure can be found from https://prometheus.io/docs/alerting/latest/configuration/#webhook_config). This means that the HTTP POST requests sent to this endpoint should follow some rules:
+  - json body should have key **alerts** which is a list of dictionaries
+  - dictionaries in **alerts** list should contain following information:
+    -  key **status** (string) ---> to change the item status in database to PROBLEM, set the value of **status** key to "firing". To change the item status in database to OK, set the value of **status** key to "resolved"
+    - key **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp database at this value is used during the SQL UPDATE query for identifying the correct application
+- example payload for changing the status of application **testikene** to PROBLEM:
+  ```
+   {"alerts": [{"status": "firing", "labels": {"appname": "testikene"}}]}
+  ``` 
+API will respond with a list of dictionaries to let the user know if the updates to specified applications were successful.
+
+Sending a HTTP POST request via CLI to change status of **testikene** to PROBLEM:
+```
+teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/update-status -H 'Content-Type: application/json' -d '{"alerts": [{"status": "firing", "labels": {"appname": "testikene"}}]}'
+[{"appname":"testikene","update":"success"}]   
+``` 
+Checking the status of **testikene** after updating the status:
+```
+teele@sk-demo:~/repo/demo-webapp/ansible$ curl http://webapp.demo:8080/get-status/testikene
+{"status":"PROBLEM"} 
+``` 
+Changing the status of **testikene** back to OK and checking the results:
+```
+teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/update-status -H 'Content-Type: application/json' -d '{"alerts": [{"status": "resolved", "labels": {"appname": "testikene"}}]}'
+[{"appname":"testikene","update":"success"}]
+teele@sk-demo:~/repo/demo-webapp/ansible$ curl http://webapp.demo:8080/get-status/testikene
+{"status":"OK"}
+``` 
+
 ## Testing webapp locally with provided demo resources
