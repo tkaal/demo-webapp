@@ -26,6 +26,7 @@
     - Dockerfile
     - requirements.txt
     - webapp.py
+  when: do_build
 
 - name: Build webapp Docker image
   community.docker.docker_image:
