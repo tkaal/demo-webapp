@@ -28,7 +28,7 @@ This is a simple proof-of-concept Python Flask application **webapp** that can b
 
 The webapp setup consists of three Docker containers running in webapp Docker network. Here is a very simple diagram of the architecture:
 
-![alt text](webapp.png)
+![alt text](./images/webapp.png)
 
 In total, there are three services in the webapp Docker compose setup:
 
@@ -92,7 +92,7 @@ Here is a little summary about what the playbook will do:
 3. Third play is optional and is disabled by default. If it is enabled, then the third play will prepare and start up resources that can be used for testing webapp. More details about these demo resources and testing webapp can be found below.
 
 When the playbook has finished, then it should be possible to access webapp via URLs http://localhost:HOSTPORT (http://localhost:8080 by default) and http://WEBAPPDOMAIN:HOSTPORT (http://webapp.demo:8080 by default). Following message and web page should be shown, if webapp is up and running: 
-![alt text](webapp_up.PNG)
+![alt text](./images/webapp_up.PNG)
 
 Check the API guide below to see how to communicate with webapp.
 
@@ -107,7 +107,7 @@ Another option for installing webapp is deploying it manually. All necessary fil
 ```
 The Docker compose file will build webapp image based on the provided Dockerfile and will start up all services. After docker compose command has finished, webapp should be accessible via URL http://localhost:8080 and display following message:
 
-![alt text](manual_install_test.PNG)
+![alt text](./images/manual_install_test.PNG)
 
 If you wish to test accessing webapp via the domain name defined in nginx configuration, add a corresponding entry to /etc/hosts file (should refer to IPv4 address of the local machine). By default, domain **webapp.demo** will be used, making the webapp accessible via URL http://webapp.demo:8080. If you wish to change webapp's domain, change the default **server_name** parameter in **./manual-deploy/config/webapp-nginx.conf** to the preferred value.
 Check the API guide below to see how to communicate with webapp.
@@ -126,7 +126,7 @@ Hello there! Demo web app is alive!
 ```
 Accessing root endpoint via browser:
 
-![alt text](webapp_up.PNG)
+![alt text](./images/webapp_up.PNG)
 ### Adding a new application to webapp's database
 Following webapp API endpoint can be used for adding a new application to webapp's database via HTTP POST request:
 ```
@@ -167,7 +167,7 @@ teele@sk-demo:~$ curl http://webapp.demo:8080/list-items
 ```
 Listing items via browser:
 
-![alt text](list_items.PNG)
+![alt text](./images/list_items.PNG)
 ### List details about a specific item in webapp's database
 Following API endpoint can be used for listing details about a specific item in webapp's database:
 ```
@@ -180,7 +180,7 @@ teele@sk-demo:~/repo/demo-webapp$ curl http://webapp.demo:8080/list-item/testike
 ```
 Listing details about app **testikene** via browser:
 
-![alt text](list_specific_item.PNG)
+![alt text](./images/list_specific_item.PNG)
 ### Get status of a specific item in webapp's database
 Following API endpoint can be used for requesting status of the specified item:
 ```
@@ -193,7 +193,7 @@ teele@sk-demo:~/repo/demo-webapp$ curl http://webapp.demo:8080/get-status/testik
 ```
 Requesting the status of application **testikene** via browser:
 
-![alt text](get_status.PNG)
+![alt text](./images/get_status.PNG)
 
 ### Update the status of a specific item in webapp's database
 Following API endpoint can be used for updating the value of column **status** for the specified item in webapp's database via HTTP POST request:
@@ -289,11 +289,11 @@ When the playbook run has finished, Grafana UI should be accessible via URL http
 The pre-made demo_nginx alert rule has label **appname** configured, this label needs to be added to all Grafana alert rules that need to use webapp's webhook as their contact point as webapp uses it to determine which application's status should be updated. 
 The demo_nginx alert rule's status should be in normal state after the demo services have started up:
 
-![alt text](demo_alert_rule.PNG)
+![alt text](./images/demo_alert_rule.PNG)
 
 Ansible also ensures that **nginx** item exists in webapp's database:
 
-![alt text](nginx_item_added_demo.PNG)
+![alt text](./images/nginx_item_added_demo.PNG)
 
 To test Grafana and webapp intergation, stop demo_nginx container:
 ```
@@ -301,15 +301,15 @@ docker stop demo_nginx
 ```
 This will cause demo_nginx alert rule to switch to firing state in a minute or two (evaluation frequency has been set to 1 minute).
 
-![alt text](demo_rule_alerting.PNG)
+![alt text](./images/demo_rule_alerting.PNG)
 
 Keep an eye on webapp's contact point. After demo_nginx alert has gone into firing state, Grafana should soon send out the notification which will be visible under webapp's contact point (Last delivery attempt). It may take a few minutes. If no message about failed delivery is displayed under webapp's contact point, then it means that the attempt was successful.
 
-![alt text](contact_point_activated.PNG)
+![alt text](./images/contact_point_activated.PNG)
 
 After Grafana shows that the alert has been sent out, it can be seen that webapp also displays that nginx's status is in **PROBLEM** state:
 
-![alt text](nginx_to_problem.PNG)
+![alt text](./images/nginx_to_problem.PNG)
 
 To test changing the status back to normal via Grafana, start demo_nginx container:
 ```
