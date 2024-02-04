@@ -201,10 +201,10 @@ Following API endpoint can be used for updating the value of column **status** f
 http://<webapp_domain>:<webapp_port>/update-status
 ```
 The logic of status updating was written to be compatible with Grafana alerting via webhook (more details about Grafana alert json body structure can be found from https://prometheus.io/docs/alerting/latest/configuration/#webhook_config). This means that HTTP POST requests sent to this endpoint should follow some rules:
-  - json body contain key **alerts** which is a list of dictionaries
-  - dictionaries in **alerts** list should contain following information:
-    -  key **status** (string) ---> to change the item status in database to PROBLEM, set the value of **status** key to "firing". To change the item status in database to OK, set the value of **status** key to "resolved". If some other value is specified, then API will skip this item.
-    - key **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp's database as this value is used during the SQL UPDATE query for identifying the correct application.
+  - json body should contain key **alerts** which is a list of dictionaries
+  - dictionaries in **alerts** list should contain following keys:
+    -  **status** (string) ---> to change the item status in database to PROBLEM, set the value of **status** key to "firing". To change the item status in database to OK, set the value of **status** key to "resolved". If some other value is specified, then API will skip this item.
+    - **labels** (dictionary) ---> **labels** value needs to be a dictionary that contains key **appname**. Value of **appname** key should match with the application's name in webapp's database as this value is used during the SQL UPDATE query for identifying the correct application.
 - example payload for changing the status of application **testikene** to PROBLEM:
   ```
    {"alerts": [{"status": "firing", "labels": {"appname": "testikene"}}]}
