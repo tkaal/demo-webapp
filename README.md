@@ -114,6 +114,7 @@ teele@sk-demo:~$ curl http://webapp.demo:8080
 Hello there! Demo web app is alive! 
 ```
 Accessing root endpoint via browser:
+
 ![alt text](webapp_up.PNG)
 ### Adding a new application to webapp's database
 Following webapp API endpoint can be used for adding a new application to webapp's database via HTTP POST request:
