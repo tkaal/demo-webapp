@@ -20,7 +20,7 @@
     - [Installing demo resources via Ansible](#installing-demo-resources-via-ansible)
       - [Prerequisites](#prerequisites-1)
       - [Preparations](#preparations-1)
-    - [Running the playbook](#running-the-playbook-1)
+      - [Running the playbook](#running-the-playbook-1)
     - [Testing webapp with demo resources](#testing-webapp-with-demo-resources)
 
 ## Overview
@@ -276,7 +276,7 @@ Before the playbook can be executed, following preparations need to be done:
   - Define value for variable **demo_user** (location **./ansible/group_vars/demo.yaml**). This user will be configured as the owner of files related to demo resources
   - If you did **NOT** use default values for webapp's domain (default webapp.demo) and host port (default 8080), then specify the correct values with variables **webapp_domain** and **webapp_host_port** in file **./ansible/group_vars/demo.yaml** or **./ansible/group_vars/all.yaml**.
   If default values for webapp were used, then it is not necessary to define these variables.
-### Running the playbook
+#### Running the playbook
 If the preparations have been done, then the demo resources can be deployed by running **webapp.yaml** playbook. If you wish to skip the webapp play, then use parameter **-t demo** when running the playbook:
 ```
 ansible-playbook webapp.yaml -t demo 
