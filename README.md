@@ -14,6 +14,7 @@
     - [List details about a specific item in webapp database](#list-details-about-a-specific-item-in-webapp-database)
     - [Get status of a specific item in webapp database](#get-status-of-a-specific-item-in-webapp-database)
     - [Update the status of a specific item in webapp database](#update-the-status-of-a-specific-item-in-webapp-database)
+    - [Deleting an item from webapp database](#deleting-an-item-from-webapp-database)
   - [Testing webapp locally with provided demo resources](#testing-webapp-locally-with-provided-demo-resources)
 
 ## Overview
@@ -106,7 +107,7 @@ If you wish to test accessing webapp via the domain name defined in nginx config
 Check the API guide below to see how to communicate with webapp.
 
 ## API guide
-In total, webapp exposes six API endpoints:
+In total, webapp exposes seven API endpoints:
 ### Root endpoint
 Root endpoint displays a greeting message if webapp is up and accessible.
 ```
@@ -125,7 +126,10 @@ Following webapp API endpoint can be used for adding a new application to webapp
 ```
 http://<webapp_domain>:<webapp_port>/insert-item
 ```
-The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. Value of json key **appname** will be used to insert the new item to webapp's database table. Keep in mind that webapp database uses **appname** column as the primary key meaning that no duplicates are allowed.
+The API endpoint is expecting a HTTP POST request with json body that contains key **appname**. Value of json key **appname** will be used to insert the new item to webapp's database table. Keep in mind that webapp database uses **appname** column as the primary key meaning that no duplicates are allowed. Example payload:
+```
+{"appname": "testikene"}
+```
 
 If the POST request is successful, then webapp will respond with a success message (e.g. adding new item **testikene** to webapp database):
 ```
@@ -218,5 +222,18 @@ teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/u
 teele@sk-demo:~/repo/demo-webapp/ansible$ curl http://webapp.demo:8080/get-status/testikene
 {"status":"OK"}
 ``` 
-
+### Deleting an item from webapp database
+Following API endpoint can be used for removing an item from webapp database via HTTP POST request:
+```
+http://<webapp_domain>:<webapp_port>/delete-item
+```
+The API endpoint is expecting a HTTP POST request with json body that contains key appname. Value of json key appname will be used in SQL DELETE query. Example payload:
+```
+{"appname": "testikene"}
+```
+Removing item **testikene** from webapp database via CLI:
+```
+teele@sk-demo:~/repo/demo-webapp/ansible$ curl -X POST http://webapp.demo:8080/delete-item -H 'Content-Type: application/json' -d '{"appname": "testikene"}'
+Successfully removed application testikene from webapp database!
+```
 ## Testing webapp locally with provided demo resources
